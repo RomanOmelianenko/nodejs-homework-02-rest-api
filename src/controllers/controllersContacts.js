@@ -1,15 +1,12 @@
-// Шаг 3. Методы(обработчики) маршрутов. Они ничего не делают кроме как формируют ответ
-// Они будут пробрасывать данные в contactsService, он будет стучаться в репозиторий(базу данных),
-// получать эти данные, отдавать контроллер, а контроллер уже формирует ответ
-
+const Joi = require('joi')
 const { HttpCode } = require('../helpers/constans')
 
 const { ContactsService } = require('../services')
 const contactsService = new ContactsService()
 
-const getAll = (req, res, next) => {
+const getAll = async (req, res, next) => {
   try {
-    const contacts = contactsService.getAll()
+    const contacts = await contactsService.listContacts()
     res.status(HttpCode.OK).json({
       status: 'Success',
       code: HttpCode.OK,
@@ -22,9 +19,11 @@ const getAll = (req, res, next) => {
   }
 }
 
-const getById = (req, res, next) => {
+const getById = async (req, res, next) => {
   try {
-    const contact = contactsService.getById(req.params)
+    const { contactId } = req.params
+    const contact = await contactsService.getContactById(contactId)
+    // console.log(contact)
     if (contact) {
       return res.status(HttpCode.OK).json({
         status: 'Success',
@@ -45,27 +44,44 @@ const getById = (req, res, next) => {
   }
 }
 
-const create = (req, res, next) => {
-  try {
-    const contact = contactsService.create(req.body)
-    res.status(HttpCode.CREATED).json({
-      status: 'Success',
-      code: HttpCode.CREATED,
-      data: {
-        contact
-      }
+const create = async (req, res, next) => {
+  const { name, email, phone } = req.body
+  const contactsShema = Joi.object({
+    name: Joi.string(),
+    email: Joi.string(),
+    phone: Joi.string()
+  })
+  const { error } = contactsShema.validate(req.body)
+  if (error) {
+    res.json({
+      status: 'Error',
+      message: error.details[0].message
     })
-  } catch (err) {
-    next(err)
+  } else {
+    try {
+      const contact = await contactsService.addContact(name, email, phone)
+      res.status(HttpCode.CREATED).json({
+        status: 'Success',
+        message: `Contact with name: ${name} added successfully!`,
+        code: HttpCode.CREATED,
+        data: {
+          contact
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
-const remove = (req, res, next) => {
+const remove = async (req, res, next) => {
   try {
-    const contact = contactsService.remove(req.params)
+    const { contactId } = req.params
+    const contact = await contactsService.removeContact(contactId)
     if (contact) {
       return res.status(HttpCode.OK).json({
         status: 'Success',
+        message: `Contact with id:${contactId} deleted successfully!`,
         code: HttpCode.OK,
         data: {
           contact
@@ -83,12 +99,14 @@ const remove = (req, res, next) => {
   }
 }
 
-const update = (req, res, next) => {
+const update = async (req, res, next) => {
   try {
-    const contact = contactsService.update(req.params, req.body)
+    const { contactId } = req.params
+    const contact = await contactsService.updateContact(contactId, req.body)
     if (contact) {
-      return res.status(HttpCode.OK).json({
+      res.status(HttpCode.OK).json({
         status: 'Success',
+        message: `Contact with id:${contactId} and name:${req.body.name} updated successfully!`,
         code: HttpCode.OK,
         data: {
           contact
