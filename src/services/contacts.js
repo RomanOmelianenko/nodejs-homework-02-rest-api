@@ -25,12 +25,12 @@ class ContactsService {
   async getContactById(contactId) {
     try {
       const contacts = JSON.parse(await fsPromises.readFile(contactsPath, 'utf-8',
-        (err, data) => {
+        (err, _data) => {
           if (err) console.log(err)
         }
       ))
-      const findContactById = contacts.find(contact => contact.id === contactId)
-      console.log(findContactById)
+      const findContactById = contacts.find(contact => contact.id.toString() === contactId)
+      // console.log(findContactById)
       return findContactById
     } catch (error) {
       console.log(error.message)
@@ -40,7 +40,7 @@ class ContactsService {
   async addContact(name, email, phone) {
     try {
       const contact = JSON.parse(await fsPromises.readFile(contactsPath, 'utf-8',
-        (err, data) => {
+        (err, _data) => {
           if (err) console.log(err)
         }
       ))
@@ -95,18 +95,22 @@ class ContactsService {
   async removeContact(contactId) {
     try {
       const contact = JSON.parse(await fsPromises.readFile(contactsPath, 'utf-8',
-        (err, data) => {
+        (err, _data) => {
           if (err) console.log(err)
         }
       ))
-      const removeContactById = contact.filter(contact => contact.id !== contactId)
+      const removeContactById = contact.filter(contact => contact.id.toString() !== contactId)
+      if (contact.length === removeContactById.length) {
+        console.log(`Not found contact with id:${contactId}`)
+        return
+      }
       await fs.writeFile(contactsPath, JSON.stringify(removeContactById), error => {
         if (error) {
           console.log(error)
         }
       })
       console.log(`Contact with id:${contactId} was removed!`)
-      console.log(removeContactById)
+      // console.log(removeContactById)
       return removeContactById
     } catch (err) {
       console.log(err.message)
