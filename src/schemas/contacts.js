@@ -25,7 +25,11 @@ const contactSchema = new Schema({
   token: {
     type: String,
     // required: [true, 'Phone contact is required'],
-  }
+  },
+  owner: {
+    type: mongoose.SchemaTypes.ObjectId,
+    ref: 'user'
+  },
   // features: {
   //   type: Array,
   //   set: data => !data ? [] : data
