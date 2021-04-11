@@ -26,14 +26,16 @@ class AuthService {
     // console.log(token)
     // const decodeToken = jwt.decode(token)
     // console.log(decodeToken)
-    // const verifyToken = jwt.verify(token, SECRET_KEY)
-    await this.model.updateOne({ _id: id }, { token })
+    const verifyToken = jwt.verify(token, SECRET_KEY)
+    if (verifyToken) {
+      await this.model.updateOne({ _id: id }, { token })
+    }
     console.log(user)
     return token
   }
 
   async logout(id) {
-    const data = await this.model.updateOne(id, null)
+    const data = await this.model.updateOne({ _id: id, token: null })
     return data
   }
 }

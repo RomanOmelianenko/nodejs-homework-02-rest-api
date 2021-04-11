@@ -44,7 +44,7 @@ const getById = async (req, res, next) => {
 }
 
 const create = async (req, res, next) => {
-  const { name, email, phone } = req.body
+  // const { name, email, phone } = req.body
   const contactsShema = Joi.object({
     name: Joi.string(),
     email: Joi.string(),
@@ -58,10 +58,12 @@ const create = async (req, res, next) => {
     })
   } else {
     try {
-      const contact = await contactsService.addContact(name, email, phone)
+      const userId = req.user.id
+      // console.log(userId)
+      const contact = await contactsService.addContact(req.body, userId)
       res.status(HttpCode.CREATED).json({
         status: 'Success',
-        message: `Contact with name: ${name} added successfully!`,
+        message: `Contact with name: ${req.name} added successfully!`,
         code: HttpCode.CREATED,
         data: {
           contact

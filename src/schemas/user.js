@@ -55,7 +55,7 @@ const userSchema = new Schema({
 //  В стрелочной функции this не будет определён
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next()
-  this.password = await bcrypt.hashSync(this.password, bcrypt.genSaltSync(SALT_FACTOR))
+  this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(SALT_FACTOR))
   // В this.password будет уже лежать захешированый пароль
   next()
 })
@@ -66,8 +66,10 @@ userSchema.path('email').validate(function (value) {
 })
 
 // 2. Статический метод
-userSchema.methods.validPassword = async function (password) {
-  return await bcrypt.compareSync(password, this.password)
+userSchema.methods.validPassword = async function ({ password }) {
+  console.log('This.password:', this.password)
+  console.log('Password:', password)
+  return await bcrypt.compare(password, this.password)
 }
 // ----------------------------------------------------------
 

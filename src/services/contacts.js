@@ -21,8 +21,8 @@ class ContactsService {
     return contactById
   }
 
-  async addContact(name, email, phone) {
-    const contact = await this.model.create({ name, email, phone })
+  async addContact(body, userId) {
+    const contact = await this.model.create({ ...body, owner: userId })
     console.log(contact)
     return contact
   }
