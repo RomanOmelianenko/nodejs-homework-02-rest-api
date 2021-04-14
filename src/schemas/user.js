@@ -1,29 +1,25 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
-// eslint-disable-next-line spaced-comment
-const SALT_FACTOR = 6 /*Оптимально проходов 6 - 10 */
 const { Schema } = mongoose
 const { Subscription } = require('../helpers/constans')
 
+const SALT_FACTOR = 6
+
 const userSchema = new Schema({
-  // name: {
-  //   type: String,
-  //   minlength: 2,
-  //   default: 'Guest',
-  // },
+  name: {
+    type: String,
+    required: [true, 'Name is required'],
+    minlength: 2,
+  },
   password: {
     type: String,
     required: [true, 'Password is required'],
+    minlength: 6,
   },
   email: {
     type: String,
     required: [true, 'Email is required'],
-    // eslint-disable-next-line spaced-comment
-    unique: true, /*unique - должен быть уникальным */
-    // validate(value) {
-    //   const reg = /\S+@\S+\.\S+/
-    //   return reg.test(String(value).toLowerCase())
-    // }
+    unique: true,
   },
   subscription: {
     type: String,
@@ -37,43 +33,21 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
-  // owner: {
-  //   type: mongoose.SchemaTypes.ObjectId,
-  //   ref: 'user'
-  // },
-  // date: {
-  //   type: Date,
-  //   default: Date.now
-  // },
 }, { versionKey: false, timeStamps: true })
-
-// -------------------------------------------------------------
-// Два подхода. Можно использовать хуки или статический метод
-// 1. Hook
-// Перед сохранением что-то должно быть и использовать метод 'pre'
-// Если поставить срелочную функцию, я потеряю контекст класса схемы userSchema
-//  В стрелочной функции this не будет определён
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next()
-  this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(SALT_FACTOR))
-  // В this.password будет уже лежать захешированый пароль
-  next()
-})
 
 userSchema.path('email').validate(function (value) {
   const reg = /\S+@\S+\.\S+/
   return reg.test(String(value).toLowerCase())
 })
 
-// 2. Статический метод
-userSchema.methods.validPassword = async function ({ password }) {
-  console.log('This.password:', this.password)
-  console.log('Password:', password)
-  return await bcrypt.compare(password, this.password)
+userSchema.methods.setPassword = async function (password) {
+  this.password = await bcrypt.hashSync(password, bcrypt.genSaltSync(SALT_FACTOR))
 }
-// ----------------------------------------------------------
+
+userSchema.methods.validPassword = async function (password) {
+  await bcrypt.compareSync(password, this.password)
+}
 
 const User = mongoose.model('user', userSchema)
-// 'user' - !!! должно совпадать с реферальной ссылкой из schemas/contacts/owner ref: 'user'
 
 module.exports = User

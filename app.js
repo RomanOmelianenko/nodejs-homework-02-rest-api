@@ -18,7 +18,6 @@ app.use('/api/contacts', contactsRouter)
 app.use('/api/users', usersRouter)
 
 app.use((req, res) => {
-  // res.status(404).json({ message: 'Not found' })
   res.status(HttpCode.NOT_FOUND).json({
     status: 'Error',
     code: HttpCode.NOT_FOUND,
@@ -27,8 +26,7 @@ app.use((req, res) => {
   })
 })
 
-app.use((err, req, res, next) => {
-  // res.status(500).json({ message: err.message })
+app.use((err, _req, res, _next) => {
   err.status = err.status ? err.status : HttpCode.INTERNAL_SERVER_ERROR
   res.status(err.status).json({
     status: err.status === 500 ? 'Fail' : 'Error',

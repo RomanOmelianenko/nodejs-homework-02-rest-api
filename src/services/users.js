@@ -1,3 +1,5 @@
+// МЕТОДЫ
+
 // const { UsersRepository } = require('../repository/users')
 const User = require('../schemas/user')
 
@@ -12,15 +14,17 @@ class UserService {
     // }
   }
 
-  async create(body) {
+  async createUserRegistry(body) {
     const user = await this.model(body)
-    console.log(user)
-    return user.save()
+    user.setPassword(body.password)
+    const userSaveInDB = user.save()
+    // console.log(user)
+    // return user.save()
+    return userSaveInDB
   }
 
   async findByEmail(email) {
     const userByEmail = await this.model.findOne({ email })
-    console.log(userByEmail)
     return userByEmail
   }
 

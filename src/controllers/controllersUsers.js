@@ -10,19 +10,24 @@ const signup = async (req, res, next) => {
   if (user) {
     return next({
       status: HttpCode.CONFLICT,
+      code: HttpCode.CONFLICT,
+      message: 'This email is already use',
       data: 'Conflict',
-      message: 'This email is already use'
     })
   }
   try {
-    const newUser = await serviceUser.create({ name, email, password })
+    const newUser = await serviceUser.createUserRegistry({ name, email, password })
+    console.log(newUser)
     return res.status(HttpCode.CREATED).json({
       status: 'Success',
-      message: `Contact with name: ${name} added successfully!`,
+      message: `User with name: '${name}' added successfully!`,
       code: HttpCode.CREATED,
       data: {
+        // user: newUser
         id: newUser.id,
+        name: newUser.name,
         email: newUser.email,
+        password: newUser.password,
       }
     })
   } catch (error) {
@@ -32,11 +37,20 @@ const signup = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body
+  const user = await serviceUser.findByEmail(email)
+  if (!user) {
+    return next({
+      status: HttpCode.NOT_FOUND,
+      data: 'Not found',
+      message: 'This email address was not found'
+    })
+  }
   try {
-    const token = await serviceAuth.login({ email, password })
+    const token = await serviceAuth.login(password)
     if (token) {
       return res.status(HttpCode.OK).json({
         status: 'Success',
+        message: `User with email: '${email}' logged in!`,
         code: HttpCode.OK,
         data: {
           token
@@ -54,7 +68,6 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   const id = req.user.id
-  // console.log(id)
   await serviceAuth.logout(id)
   return res.status(HttpCode.NO_CONTENT).json({
     status: 'Success',

@@ -1,4 +1,3 @@
-const Joi = require('joi')
 const { HttpCode } = require('../helpers/constans')
 
 const { ContactsService } = require('../services')
@@ -6,12 +5,13 @@ const contactsService = new ContactsService()
 
 const getAll = async (req, res, next) => {
   try {
-    const contacts = await contactsService.listContacts()
+    const userId = req.user.id
+    const contacts = await contactsService.listContacts(userId, req.query)
     res.status(HttpCode.OK).json({
       status: 'Success',
       code: HttpCode.OK,
       data: {
-        contacts
+        ...contacts
       }
     })
   } catch (err) {
@@ -44,34 +44,20 @@ const getById = async (req, res, next) => {
 }
 
 const create = async (req, res, next) => {
-  // const { name, email, phone } = req.body
-  const contactsShema = Joi.object({
-    name: Joi.string(),
-    email: Joi.string(),
-    phone: Joi.string()
-  })
-  const { error } = contactsShema.validate(req.body)
-  if (error) {
-    res.json({
-      status: 'Error',
-      message: error.details[0].message
+  try {
+    const userId = req.user.id
+    // console.log(userId)
+    const contact = await contactsService.addContact(req.body, userId)
+    res.status(HttpCode.CREATED).json({
+      status: 'Success',
+      message: `Contact with id: ${req.name} added successfully!`,
+      code: HttpCode.CREATED,
+      data: {
+        contact
+      }
     })
-  } else {
-    try {
-      const userId = req.user.id
-      // console.log(userId)
-      const contact = await contactsService.addContact(req.body, userId)
-      res.status(HttpCode.CREATED).json({
-        status: 'Success',
-        message: `Contact with name: ${req.name} added successfully!`,
-        code: HttpCode.CREATED,
-        data: {
-          contact
-        }
-      })
-    } catch (err) {
-      next(err)
-    }
+  } catch (err) {
+    next(err)
   }
 }
 
@@ -103,11 +89,12 @@ const remove = async (req, res, next) => {
 const update = async (req, res, next) => {
   try {
     const { contactId } = req.params
+    const { name } = req.body
     const contact = await contactsService.updateContact(contactId, req.body)
     if (contact) {
       res.status(HttpCode.OK).json({
         status: 'Success',
-        message: `Contact with id:${contactId} and name:${req.body.name} updated successfully!`,
+        message: `Contact with id:${contactId} and name:${name} updated successfully!`,
         code: HttpCode.OK,
         data: {
           contact
