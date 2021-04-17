@@ -45,9 +45,9 @@ userSchema.methods.setPassword = async function (password) {
 }
 
 userSchema.methods.validPassword = async function (password) {
-  await bcrypt.compareSync(password, this.password)
+  return await bcrypt.compareSync(password, this.password)
 }
 
-const User = mongoose.model('user', userSchema)
+const User = mongoose.model('User', userSchema)
 
 module.exports = User

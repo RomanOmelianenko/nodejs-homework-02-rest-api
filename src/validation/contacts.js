@@ -17,7 +17,6 @@ const validate = (schema, body, next) => {
   const { error } = schema.validate(body)
   if (error) {
     const [{ message }] = error.details
-    // console.log('🚀 ~ file: contacts.js ~ line 20 ~ validate ~ error.details', error.details)
     return next({
       status: HttpCode.BAD_REQUEST,
       message: `Filed: ${message.replace(/"/g, '')}`,

@@ -25,13 +25,11 @@ class ContactsService {
         }
       }
     )
-    // console.log("🚀 ~ file: contacts.js ~ line 46 ~ ContactsService ~ listContacts ~ filter.split('|').join(' ')", filter.split('|').join(' '))
-    console.log(contacts)
     return { contacts, total, limit: Number(limit), offset: Number(offset) }
   }
 
-  async getContactById(contactId) {
-    const contactById = await this.model.findOne({ _id: contactId }).populate({
+  async getContactById(userId, contactId) {
+    const contactById = await this.model.findOne({ _id: contactId, owner: userId }).populate({
       path: 'owner',
       select: 'name email phone'
     })
@@ -39,23 +37,23 @@ class ContactsService {
     return contactById
   }
 
-  async addContact(body, userId) {
+  async addContact(userId, body) {
     const contact = await this.model.create({ ...body, owner: userId })
     console.log(contact)
     return contact
   }
 
-  async updateContact(contactId, body) {
+  async updateContact(userId, contactId, body) {
     const contact = await this.model.findByIdAndUpdate(
-      { _id: contactId },
+      { _id: contactId, owner: userId },
       { ...body },
       { new: true },
     )
     return contact
   }
 
-  async removeContact(contactId) {
-    const contact = await this.model.findByIdAndRemove({ _id: contactId })
+  async removeContact(userId, contactId) {
+    const contact = await this.model.findByIdAndRemove({ _id: contactId, owner: userId })
     console.log(contact)
     return contact
   }

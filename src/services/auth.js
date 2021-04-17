@@ -8,25 +8,33 @@ class AuthService {
     this.model = User
   }
 
-  async login(password, email) {
-    const user = await this.model.findOne(email)
-    console.log(user.password)
-    if (!user || !user.validPassword(password)) {
-      return null
+  async updateToken(id, token) {
+    await this.model.updateOne({ _id: id }, { token })
+  }
+
+  async login(email, password) {
+    const user = await this.model.findOne({ email })
+    const passwordIsValid = await user.validPassword(password)
+    if (!user || !passwordIsValid) {
+      return
     }
-    const id = user._id
+    const id = user.id
     const payload = { id }
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' })
+    console.log('Payload', payload)
+    const token = await jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' })
     const verifyToken = jwt.verify(token, SECRET_KEY)
+    console.log(verifyToken)
     if (verifyToken) {
-      await this.model.updateOne({ _id: id }, { token })
+      await this.updateToken(id, token)
+      console.log('Payload', payload)
+      console.log('Token', token)
     }
     console.log(user)
     return token
   }
 
   async logout(id) {
-    const data = await this.model.updateOne({ _id: id, token: null })
+    const data = await this.updateToken(id, null)
     return data
   }
 }
