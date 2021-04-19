@@ -1,4 +1,3 @@
-const Joi = require('joi')
 const { HttpCode } = require('../helpers/constans')
 
 const { ContactsService } = require('../services')
@@ -6,12 +5,14 @@ const contactsService = new ContactsService()
 
 const getAll = async (req, res, next) => {
   try {
-    const contacts = await contactsService.listContacts()
+    const userId = req.user.id
+    console.log(userId)
+    const contacts = await contactsService.listContacts(userId, req.query)
     res.status(HttpCode.OK).json({
       status: 'Success',
       code: HttpCode.OK,
       data: {
-        contacts
+        ...contacts
       }
     })
   } catch (err) {
@@ -21,8 +22,9 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
+    const userId = req.user.id
     const { contactId } = req.params
-    const contact = await contactsService.getContactById(contactId)
+    const contact = await contactsService.getContactById(userId, contactId)
     if (contact) {
       return res.status(HttpCode.OK).json({
         status: 'Success',
@@ -44,39 +46,28 @@ const getById = async (req, res, next) => {
 }
 
 const create = async (req, res, next) => {
-  const { name, email, phone } = req.body
-  const contactsShema = Joi.object({
-    name: Joi.string(),
-    email: Joi.string(),
-    phone: Joi.string()
-  })
-  const { error } = contactsShema.validate(req.body)
-  if (error) {
-    res.json({
-      status: 'Error',
-      message: error.details[0].message
+  try {
+    const userId = req.user.id
+    const { name } = req.body
+    const contact = await contactsService.addContact(userId, req.body)
+    res.status(HttpCode.CREATED).json({
+      status: 'Success',
+      message: `Contact with name: '${name}' added successfully!`,
+      code: HttpCode.CREATED,
+      data: {
+        contact
+      }
     })
-  } else {
-    try {
-      const contact = await contactsService.addContact(name, email, phone)
-      res.status(HttpCode.CREATED).json({
-        status: 'Success',
-        message: `Contact with name: ${name} added successfully!`,
-        code: HttpCode.CREATED,
-        data: {
-          contact
-        }
-      })
-    } catch (err) {
-      next(err)
-    }
+  } catch (err) {
+    next(err)
   }
 }
 
 const remove = async (req, res, next) => {
   try {
+    const userId = req.user.id
     const { contactId } = req.params
-    const contact = await contactsService.removeContact(contactId)
+    const contact = await contactsService.removeContact(userId, contactId)
     if (contact) {
       return res.status(HttpCode.OK).json({
         status: 'Success',
@@ -100,12 +91,14 @@ const remove = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
+    const userId = req.user.id
     const { contactId } = req.params
-    const contact = await contactsService.updateContact(contactId, req.body)
+    const { name } = req.body
+    const contact = await contactsService.updateContact(userId, contactId, req.body)
     if (contact) {
       res.status(HttpCode.OK).json({
         status: 'Success',
-        message: `Contact with id:${contactId} and name:${req.body.name} updated successfully!`,
+        message: `Contact with id:${contactId} and name:${name} updated successfully!`,
         code: HttpCode.OK,
         data: {
           contact
