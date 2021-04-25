@@ -7,6 +7,7 @@ const guard = (req, res, next) => {
     if (!user || err) {
       return next({
         status: HttpCode.FORBIDDEN,
+        code: HttpCode.FORBIDDEN,
         message: 'Forbidden'
       })
     }
