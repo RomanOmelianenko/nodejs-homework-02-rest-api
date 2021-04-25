@@ -1,5 +1,9 @@
 const { AuthService, UsersService, ContactsService } = require('../services')
 const { HttpCode } = require('../helpers/constans')
+const fs = require('fs').promises
+const path = require('path')
+const jimp = require('jimp')
+require('dotenv').config()
 
 const serviceAuth = new AuthService()
 const serviceUser = new UsersService()
@@ -29,7 +33,8 @@ const signup = async (req, res, next) => {
         name: newUser.name,
         email: newUser.email,
         password: newUser.password,
-        subscription: newUser.subscription
+        subscription: newUser.subscription,
+        avatarUrl: newUser.avatarUrl,
       }
     })
   } catch (error) {
@@ -115,10 +120,39 @@ const updateUser = async (req, res, next) => {
   }
 }
 
+const updateAvatars = async (req, res, next) => {
+  console.log('req.file:', req.file)
+  const id = req.user.id
+  const pathFile = req.file.path
+  const { filename } = req.file
+  const img = await jimp.read(pathFile)
+  await img
+    .autocrop()
+    .cover(250, 250, jimp.HORIZONTAL_ALIGN_CENTER || jimp.VERTICAL_ALIGN_MIDDLE)
+    .writeAsync(pathFile)
+  const AVATARS_DIR = path.join(process.cwd(), process.env.AVATARS_DIR)
+  await fs.rename(pathFile, path.join(AVATARS_DIR, filename))
+  const pathFileTransfer = path.join(AVATARS_DIR, filename)
+  try {
+    const url = await serviceUser.updateCloudAvatar(id, pathFileTransfer)
+    fs.unlink(pathFileTransfer)
+    return res.status(HttpCode.OK).json({
+      status: 'Success',
+      code: HttpCode.OK,
+      avatarUrl: url
+    })
+  } catch (err) {
+    next(err)
+  }
+  // res.redirect('/')
+}
+
 module.exports = {
   signup,
   login,
   logout,
   getAllContacts,
   updateUser,
+  updateAvatars,
+  // avatarCloudUpdate,
 }
