@@ -1,8 +1,5 @@
 const User = require('../schemas/user')
 const cloudinary = require('cloudinary').v2
-// const { ErrorHandler } = require('../helpers/rrorHandler') - !!! надо создать
-// const fs = require('fs').promises
-// const fs = require('fs/promises')
 require('dotenv').config()
 
 class UserService {
@@ -16,8 +13,6 @@ class UserService {
     })
   }
 
-  // Загрузка на cloudinary. Cервис cloudinary не может работать с промисами (работает с колбеками),
-  // поэтому его надо обернуть в промис
   async uploadCloud(pathFileTransfer) {
     // console.log('pathFile:', pathFile)
     return new Promise((resolve, reject) => {

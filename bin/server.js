@@ -13,11 +13,11 @@ const PORT = process.env.PORT || 3000
 connection
   .then(() => {
     app.listen(PORT, async () => {
+      console.log('Database connection successful')
+      console.log(`Server running. Use our API on port: ${PORT}`)
       await createFolderIsNotExist(TEMP_DIR)
       await createFolderIsNotExist(PUBLIC_DIR)
       await createFolderIsNotExist(AVATARS_DIR)
-      console.log('Database connection successful')
-      console.log(`Server running. Use our API on port: ${PORT}`)
     })
   })
   .catch(err => {

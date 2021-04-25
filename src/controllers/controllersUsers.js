@@ -132,10 +132,10 @@ const updateAvatars = async (req, res, next) => {
     .writeAsync(pathFile)
   const AVATARS_DIR = path.join(process.cwd(), process.env.AVATARS_DIR)
   await fs.rename(pathFile, path.join(AVATARS_DIR, filename))
+  const pathFileTransfer = path.join(AVATARS_DIR, filename)
   try {
-    const pathFileTransfer = path.join(AVATARS_DIR, filename)
     const url = await serviceUser.updateCloudAvatar(id, pathFileTransfer)
-
+    fs.unlink(pathFileTransfer)
     return res.status(HttpCode.OK).json({
       status: 'Success',
       code: HttpCode.OK,
