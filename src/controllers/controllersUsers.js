@@ -1,4 +1,4 @@
-const { AuthService, UsersService, ContactsService } = require('../services')
+const { AuthService, UsersService } = require('../services')
 const { HttpCode } = require('../helpers/constans')
 const fs = require('fs').promises
 const path = require('path')
@@ -7,7 +7,7 @@ require('dotenv').config()
 
 const serviceAuth = new AuthService()
 const serviceUser = new UsersService()
-const contactsService = new ContactsService()
+// const contactsService = new ContactsService()
 
 const signup = async (req, res, next) => {
   const { name, email, password } = req.body
@@ -22,7 +22,7 @@ const signup = async (req, res, next) => {
   }
   try {
     const newUser = await serviceUser.createUserRegistry({ name, email, password })
-    console.log(newUser)
+    // console.log(newUser)
     return res.status(HttpCode.CREATED).json({
       status: 'Success',
       message: `User with name: '${name}' added successfully!`,
@@ -84,23 +84,6 @@ const logout = async (req, res, next) => {
   })
 }
 
-const getAllContacts = async (req, res, next) => {
-  try {
-    const userId = req.user.id
-    console.log(userId)
-    const contacts = await contactsService.listContacts(userId, req.query)
-    res.status(HttpCode.OK).json({
-      status: 'Success',
-      code: HttpCode.OK,
-      data: {
-        ...contacts
-      }
-    })
-  } catch (err) {
-    next(err)
-  }
-}
-
 const updateUser = async (req, res, next) => {
   try {
     const { contactId } = req.params
@@ -147,12 +130,61 @@ const updateAvatars = async (req, res, next) => {
   // res.redirect('/')
 }
 
+const currentUser = async (req, res, next) => {
+  try {
+    const userId = req.user.id
+    const user = await serviceUser.getCurrentUserById(userId)
+    if (user) {
+      return res.status(HttpCode.OK).json({
+        status: 'Success',
+        code: HttpCode.OK,
+        data: {
+          user
+        }
+      })
+    } else {
+      next({
+        status: HttpCode.UNAUTHORIZED,
+        message: 'Invalid credentials',
+      })
+    }
+  } catch (err) {
+    next(err)
+  }
+}
+
+const verifyUser = async (req, res, next) => {
+  try {
+    // req.params - падает токен
+    const { token } = req.params
+    // console.log('🚀 ~ file: controllersUsers.js ~ line 160 ~ verifyUser ~ token', token)
+    const result = await serviceUser.verifyUser(token)
+    if (result) {
+      return res.status(HttpCode.OK).json({
+        status: 'Success',
+        code: HttpCode.OK,
+        data: {
+          message: 'Verification successful'
+        }
+      })
+    } else {
+      return next({
+        status: HttpCode.BAD_REQUEST,
+        message: 'Your verification token is not valid. Contatc support',
+      })
+    }
+  } catch (err) {
+    next(err)
+  }
+}
+
 module.exports = {
   signup,
   login,
   logout,
-  getAllContacts,
   updateUser,
   updateAvatars,
+  currentUser,
+  verifyUser,
   // avatarCloudUpdate,
 }
