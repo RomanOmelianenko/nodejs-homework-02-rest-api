@@ -1,5 +1,6 @@
 const User = require('../schemas/user')
-const EmailService = require('./email')
+// const EmailService = require('./email')
+const nodemailer = require('../helpers/nodemailer')
 const { ErrorHandler } = require('../helpers/errorHandler')
 const cloudinary = require('cloudinary').v2
 const { nanoid } = require('nanoid')
@@ -8,12 +9,13 @@ require('dotenv').config()
 class UserService {
   constructor() {
     this.model = User
-    this.emailService = new EmailService()
+    // this.emailService = new EmailService()
+    this.nodemailer = nodemailer
     this.cloudinary = cloudinary
     this.cloudinary.config({
       cloud_name: process.env.CLOUD_NAME,
       api_key: process.env.API_KEY,
-      api_secret: process.env.API_SECRET,
+      api_secret: process.env.API_SECRET, 
     })
   }
 
@@ -22,7 +24,8 @@ class UserService {
     const { email, name } = body
     // send email - сдесь надо отправить письмо на почту
     try {
-      await this.emailService.sendEmail(verifyToken, email, name)
+      // await this.emailService.sendEmail(verifyToken, email, name)
+      await this.nodemailer.sendEmail(verifyToken, email, name)
     } catch (err) {
       throw new ErrorHandler(503, err.message, 'Service Unavailable')
       // console.log(err)

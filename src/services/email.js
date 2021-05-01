@@ -10,7 +10,7 @@ class EmailService {
 
   createTemplate(verifyToken, name) {
     // mailGenetator - генерирует письмо
-    const mailGenetator = new this.GenerateTemplate({
+    const mailGenerator = new this.GenerateTemplate({
       theme: 'default',
       product: {
         name: 'System contacts',
@@ -32,7 +32,8 @@ class EmailService {
         outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
       }
     }
-    const emailBody = mailGenetator.generate(email)
+    const emailBody = mailGenerator.generate(email)
+    // console.log('emailBody:', emailBody)
     return emailBody
   }
 
@@ -40,7 +41,7 @@ class EmailService {
     const emailBody = this.createTemplate(verifyToken, name)
     // console.log('🚀 ~ file: email.js ~ line 39 ~ EmailService ~ sendEmail ~ emailBody', emailBody)
 
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+    this.sender.setApiKey(process.env.SENDGRID_API_KEY)
 
     const msg = {
       to: email, // Change to your recipient
@@ -50,14 +51,14 @@ class EmailService {
       html: emailBody,
     }
 
-    await this.sender.send(msg)
-    // .then((response) => {
-    //   console.log(response[0].statusCode)
-    //   console.log(response[0].headers)
-    // })
-    // .catch((error) => {
-    //   console.error(error)
-    // })
+    this.sender.send(msg)
+      .then((response) => {
+        console.log(response[0].statusCode)
+        console.log(response[0].headers)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
   }
 }
 
