@@ -158,7 +158,7 @@ const verifyUser = async (req, res, next) => {
     // req.params - падает токен
     const { token } = req.params
     // console.log('🚀 ~ file: controllersUsers.js ~ line 160 ~ verifyUser ~ token', token)
-    const result = await serviceUser.verifyUser(token)
+    const result = await serviceUser.verifyUser({verifyToken: token})
     if (result) {
       return res.status(HttpCode.OK).json({
         status: 'Success',

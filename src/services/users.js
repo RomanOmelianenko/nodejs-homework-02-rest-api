@@ -80,10 +80,10 @@ class UserService {
     return currentUser
   }
 
-  async verifyUser(token) {
+  async verifyUser(token, field) {
     const user = await this.model({ verifyToken: token })
-    if (!user) {
-      await user.updateOne({ verify: true, verifyToken: null })
+    if (user) {
+      await user.updateOne({ verify: true, verifyToken: null, field })
       return true
     }
     return false
