@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer')
-const hbs = require('nodemailer-express-handlebars')
+// const hbs = require('nodemailer-express-handlebars')
 require('dotenv').config()
 
 async function sendEmail(verifyToken, email, name) {
@@ -26,10 +26,10 @@ async function sendEmail(verifyToken, email, name) {
     subject: 'Verify your email',
     // text: 'Confirm your account',
     // html: '<button type="submit"><a href=`http:localhost:3000/api/users/verify/${verifyToken}`></a>Confirm your account</button>',
-    // template: 'main',
+    // template: 'main', - for Handlebars
   }
 
-  mailOptions.html = 
+  mailOptions.html =
     `<div style='text-align: center'>
       <h1>Hi, ${name},</h1>
       <h2 style='color: blue'>Welcome to System Contacts!</h2>
@@ -44,13 +44,13 @@ async function sendEmail(verifyToken, email, name) {
     </div>`
 
   await transporter.sendMail(mailOptions)
-    // .then((response) => {
-    //     console.log(response[0].statusCode)
-    //     console.log(response[0].headers)
-    //   })
-    //   .catch((error) => {
-    //     console.error(error)
-    //   })
+  // .then((response) => {
+  //     console.log(response[0].statusCode)
+  //     console.log(response[0].headers)
+  //   })
+  //   .catch((error) => {
+  //     console.error(error)
+  //   })
 }
 
 module.exports = { sendEmail }
