@@ -15,8 +15,8 @@ class AuthService {
   async login(email, password) {
     const user = await this.model.findOne({ email })
     const passwordIsValid = await user.validPassword(password)
-    if (!user || !passwordIsValid) {
-      return
+    if (!user || !passwordIsValid || !user.verify) {
+      return null
     }
     const id = user.id
     const payload = { id }
