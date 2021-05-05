@@ -4,10 +4,8 @@ const controllersUsers = require('../../src/controllers/controllersUsers')
 const guard = require('../../src/helpers/guard')
 const upload = require('../../src/helpers/multer')
 
-// router.get('/current', guard, controllersUsers.getAllContacts)
 router.get('/current', guard, controllersUsers.currentUser)
-// eslint-disable-next-line spaced-comment
-router.get('/verify/:verificationToken', controllersUsers.verifyUser) /*сдесь token приходит в письме*/
+router.get('/verify/:verifyToken', controllersUsers.verifyUser)
 router.post('/signup', controllersUsers.signup)
 router.post('/login', controllersUsers.login)
 router.post('/logout', guard, controllersUsers.logout)

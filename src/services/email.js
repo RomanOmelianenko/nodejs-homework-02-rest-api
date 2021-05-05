@@ -24,7 +24,7 @@ class EmailService {
         action: {
           instructions: 'To get started with System Contacts, please click here:',
           button: {
-            color: '#22BC66', // Optional action button color
+            color: '#22BC66',
             text: 'Confirm your account',
             link: `http:localhost:3000/api/users/verify/${verifyToken}`
           }
@@ -33,19 +33,17 @@ class EmailService {
       }
     }
     const emailBody = mailGenerator.generate(email)
-    // console.log('emailBody:', emailBody)
     return emailBody
   }
 
   async sendEmail(verifyToken, email, name) {
     const emailBody = this.createTemplate(verifyToken, name)
-    // console.log('🚀 ~ file: email.js ~ line 39 ~ EmailService ~ sendEmail ~ emailBody', emailBody)
 
     this.sender.setApiKey(process.env.SENDGRID_API_KEY)
 
     const msg = {
-      to: email, // Change to your recipient
-      from: 'noreply@system-contacts.com', // Change to your verified sender
+      to: email,
+      from: 'noreply@system-contacts.com',
       subject: 'Verify your email',
       text: 'Click to link',
       html: emailBody,

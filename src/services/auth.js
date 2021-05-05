@@ -15,9 +15,12 @@ class AuthService {
   async login(email, password) {
     const user = await this.model.findOne({ email })
     const passwordIsValid = await user.validPassword(password)
+    console.log('user.verify:', user.verify)
     if (!user || !passwordIsValid || !user.verify) {
+      console.log('FALSE')
       return null
     }
+    console.log('TRUE')
     const id = user.id
     const payload = { id }
     const token = await jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' })

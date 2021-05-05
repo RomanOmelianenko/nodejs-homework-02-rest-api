@@ -1,5 +1,3 @@
-// Когда нет next() делаем кастомный обработчик ошибок
-
 class ErrorHandler extends Error {
   constructor(status, message, data = null) {
     super()

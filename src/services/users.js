@@ -15,20 +15,17 @@ class UserService {
     this.cloudinary.config({
       cloud_name: process.env.CLOUD_NAME,
       api_key: process.env.API_KEY,
-      api_secret: process.env.API_SECRET, 
+      api_secret: process.env.API_SECRET,
     })
   }
 
   async createUserRegistry(body) {
     const verifyToken = nanoid()
     const { email, name } = body
-    // send email - сдесь надо отправить письмо на почту
     try {
-      // await this.emailService.sendEmail(verifyToken, email, name)
       await this.nodemailer.sendEmail(verifyToken, email, name)
     } catch (err) {
       throw new ErrorHandler(503, err.message, 'Service Unavailable')
-      // console.log(err)
     }
     const user = await this.model({ ...body, verifyToken })
     user.setPassword(body.password)
@@ -80,10 +77,13 @@ class UserService {
     return currentUser
   }
 
-  async verifyUser(token, field) {
-    const user = await this.model({ verifyToken: token })
+  async verifyUser(verifyToken) {
+    console.log('verifyUser token:', verifyToken)
+    const user = await this.model.findOne({ verifyToken })
+    console.log('verifyUser:', user)
     if (user) {
-      await user.updateOne({ verify: true, verifyToken: null, field })
+      await user.updateOne({ verify: true, verifyToken: null })
+      console.log('updateOne user verify:', user.verify)
       return true
     }
     return false

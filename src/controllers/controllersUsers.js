@@ -7,7 +7,6 @@ require('dotenv').config()
 
 const serviceAuth = new AuthService()
 const serviceUser = new UsersService()
-// const contactsService = new ContactsService()
 
 const signup = async (req, res, next) => {
   const { name, email, password } = req.body
@@ -155,11 +154,10 @@ const currentUser = async (req, res, next) => {
 
 const verifyUser = async (req, res, next) => {
   try {
-    // req.params - падает токен
-    const { token } = req.params
-    // console.log('🚀 ~ file: controllersUsers.js ~ line 160 ~ verifyUser ~ token', token)
-    const result = await serviceUser.verifyUser({verifyToken: token})
+    const { verifyToken } = req.params
+    const result = await serviceUser.verifyUser(verifyToken)
     if (result) {
+      await result
       return res.status(HttpCode.OK).json({
         status: 'Success',
         code: HttpCode.OK,
@@ -186,5 +184,4 @@ module.exports = {
   updateAvatars,
   currentUser,
   verifyUser,
-  // avatarCloudUpdate,
 }
